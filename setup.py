@@ -6,7 +6,7 @@ MODULES = ['os','sys','psutil','webbrowser','shlex','subprocess','signal','decim
     'compiler']
 	
 PACKAGES = ['django','email','logging']
-DATA_FILES = ['gui_images','MyProject']
+DATA_FILES = ['icons','MyProject']
 
 OPTIONS = {'includes':MODULES, 'packages': PACKAGES}
 

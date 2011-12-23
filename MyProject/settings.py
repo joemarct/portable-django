@@ -1,4 +1,4 @@
-# Django settings for MyProject project.
+# Django settings for MyProject2 project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -83,7 +83,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'o&-z0ez63box07#1=*e$#$g+#8d=ma4u9ghj%6#@vko_v=6b1^'
+SECRET_KEY = '3m5sux)5b^$yd9hb5jypr1_86)cdg7sfet2r-d&9ipn40)lxfg'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -118,7 +118,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    #'django.contrib.admindocs',
+    # 'django.contrib.admindocs',
 )
 
 # A sample logging configuration. The only tangible logging
