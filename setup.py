@@ -1,11 +1,11 @@
 from setuptools import setup
 
 APP = ['DjangoApp.py']
-MODULES = ['os','sys','psutil','webbrowser','shlex','subprocess','signal','wx',
-	'decimal','Cookie','cgi','htmlentitydefs','smtplib','BaseHTTPServer', 'imghdr',
-	'sndhdr']
+MODULES = ['os','sys','psutil','webbrowser','shlex','subprocess','signal','decimal','Cookie','cgi',
+    'htmlentitydefs','smtplib','BaseHTTPServer', 'imghdr','sndhdr','wx','sqlite3','docutils',
+    'compiler']
 	
-PACKAGES = ['django','email','logging','sqlite3','docutils','compiler']
+PACKAGES = ['django','email','logging']
 DATA_FILES = ['gui_images','MyProject']
 
 OPTIONS = {'includes':MODULES, 'packages': PACKAGES}
