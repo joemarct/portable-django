@@ -4,7 +4,8 @@ import wx
 import signal, psutil
 import os, sys, webbrowser
 import shlex, subprocess
-import django
+import django, time
+
 
 os.chdir('MyProject')
 
@@ -28,11 +29,12 @@ class Editor(wx.Frame):
         panel.SetSizer(panelSizer)
         panel.Fit()
 
-        toolbar = self.CreateToolBar()
-        tool_save = toolbar.AddSimpleTool(wx.NewId(), wx.Image('../icons/save.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Save', 'Save')
-        toolbar.Realize()
-        toolbar.SetToolBitmapSize(size=(32,32))
-        self.Bind(wx.EVT_TOOL, self.OnSave, tool_save)
+        self.toolbar = self.CreateToolBar(wx.TB_TEXT)
+        self.tool_save = self.toolbar.AddLabelTool(wx.NewId(), 'Save', wx.Image('../icons/save.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+        self.toolbar.EnableTool(self.tool_save.GetId(), False)
+        self.toolbar.Realize()
+        self.toolbar.SetToolBitmapSize(size=(32,32))
+        self.Bind(wx.EVT_TOOL, self.OnSave, self.tool_save)
 
         file_content = open(file,'r')
         for line in file_content.readlines():
@@ -40,8 +42,17 @@ class Editor(wx.Frame):
 
         self.Bind(wx.EVT_TEXT, self.OnModify)
 
+        menuBar = wx.MenuBar()
+        menu1 = wx.Menu()
+        self.save = menu1.Append(wx.NewId(), '&Save\tCtrl-S', 'Save')
+        menuBar.Append(menu1, '&File')        
+        self.SetMenuBar(menuBar)
+
+        self.Bind(wx.EVT_MENU, self.OnSave, self.save)
+
     def OnModify(self, event):
-        self.SetStatusText('File modified. Make sure to save your changes.')
+        self.toolbar.EnableTool(self.tool_save.GetId(), True)
+        self.SetStatusText('File modified')
 
     def SaveFile(self):
         out = open(self.file,'w')
@@ -51,6 +62,7 @@ class Editor(wx.Frame):
             
     def OnSave(self, event):
         self.SaveFile()
+        self.toolbar.EnableTool(self.tool_save.GetId(), False)
 
 
 class Frame(wx.Frame):
@@ -70,24 +82,26 @@ class Frame(wx.Frame):
         panel.Fit()
 
         self.textarea.write('''You are now ready to play with Django.\nClick the Run button to start the server.\n''')
-        self.textarea.write('''\nThe Browse button will take you to the admin login page.\nUsername: admin, password: admin\n''')
+        
+        self.toolbar = self.CreateToolBar(wx.TB_TEXT)
+        self.tool_run = self.toolbar.AddLabelTool(wx.NewId(), 'Run', wx.Image('../icons/run.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+        self.tool_stop = self.toolbar.AddLabelTool(wx.NewId(), 'Stop', wx.Image('../icons/stop.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+        self.tool_browse = self.toolbar.AddLabelTool(wx.NewId(), 'Browse', wx.Image('../icons/open_browser.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+        self.tool_create = self.toolbar.AddLabelTool(wx.NewId(), 'Create App', wx.Image('../icons/create_app.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+        self.tool_sync = self.toolbar.AddLabelTool(wx.NewId(), 'Sync DB', wx.Image('../icons/sync_db.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+        self.tool_edit = self.toolbar.AddLabelTool(wx.NewId(), 'Edit', wx.Image('../icons/edit_files.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+        self.toolbar.Realize()
+        self.toolbar.SetToolBitmapSize(size=(32,32))
+        
+        self.toolbar.EnableTool(self.tool_stop.GetId(), False)
+        self.toolbar.EnableTool(self.tool_browse.GetId(), False)
 
-        toolbar = self.CreateToolBar()
-        tool_run = toolbar.AddSimpleTool(wx.NewId(), wx.Image('../icons/run.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Run', 'Run')
-        tool_stop = toolbar.AddSimpleTool(wx.NewId(), wx.Image('../icons/stop.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Stop', 'Stop')
-        tool_browse = toolbar.AddSimpleTool(wx.NewId(), wx.Image('../icons/open_browser.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Browse', 'Browse')
-        tool_create = toolbar.AddSimpleTool(wx.NewId(), wx.Image('../icons/create_app.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Create App', 'Create App')
-        tool_sync = toolbar.AddSimpleTool(wx.NewId(), wx.Image('../icons/sync_db.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Sync DB', 'Sync DB')
-        tool_edit = toolbar.AddSimpleTool(wx.NewId(), wx.Image('../icons/edit_files.png', wx.BITMAP_TYPE_PNG).ConvertToBitmap(), 'Edit', 'Edit')
-        toolbar.Realize()
-        toolbar.SetToolBitmapSize(size=(32,32))
-        self.Bind(wx.EVT_TOOL, self.OnRun, tool_run)
-        self.Bind(wx.EVT_TOOL, self.OnStop, tool_stop)
-        self.Bind(wx.EVT_TOOL, self.OnBrowse, tool_browse)
-        self.Bind(wx.EVT_TOOL, self.OnCreate, tool_create)
-        self.Bind(wx.EVT_TOOL, self.OnSync, tool_sync)
-        self.Bind(wx.EVT_TOOL, self.OnEdit, tool_edit)
-
+        self.Bind(wx.EVT_TOOL, self.OnRun, self.tool_run)
+        self.Bind(wx.EVT_TOOL, self.OnStop, self.tool_stop)
+        self.Bind(wx.EVT_TOOL, self.OnBrowse, self.tool_browse)
+        self.Bind(wx.EVT_TOOL, self.OnCreate, self.tool_create)
+        self.Bind(wx.EVT_TOOL, self.OnSync, self.tool_sync)
+        self.Bind(wx.EVT_TOOL, self.OnEdit, self.tool_edit)
 
         menuBar = wx.MenuBar()
         menu1 = wx.Menu()
@@ -119,6 +133,12 @@ class Frame(wx.Frame):
             self.ServerStatus('Up')
         elif self.server_status == 'Up':
             self.textarea.write('\nThe development server is already running')
+       
+        self.textarea.write('''\nThe Browse button will take you to the admin login page.\nUsername: admin, password: admin\n''')
+
+        self.toolbar.EnableTool(self.tool_stop.GetId(), True)
+        self.toolbar.EnableTool(self.tool_browse.GetId(), True)
+
 
     def ShutdownServer(self):
         if self.server_status == 'Up':
@@ -133,8 +153,11 @@ class Frame(wx.Frame):
                   
     def OnStop(self, event):
         self.ShutdownServer()
+        self.toolbar.EnableTool(self.tool_stop.GetId(), False)
+        self.toolbar.EnableTool(self.tool_browse.GetId(), False)
 
     def OnBrowse(self, event):
+        time.sleep(1)
         webbrowser.open('http://localhost:8000/admin/', new=1)
 
     def OnCreate(self, event):
@@ -158,7 +181,8 @@ class Frame(wx.Frame):
         self.textarea.write('\n'+syncdb.stdout.read())
 
     def OnEdit(self, event):
-        dialog = wx.FileDialog(None, message='Choose a file to edit', defaultDir=os.getcwd(), wildcard='*.py')
+        file_types = "Python files (*.py)|*.py|HTML template files (*.html)|*.html|CSS files (*.css)|*.css" 
+        dialog = wx.FileDialog(None, message='Choose a file to edit', defaultDir=os.getcwd(), wildcard=file_types)
         if dialog.ShowModal() == wx.ID_OK:
             file = dialog.GetPath()
             editor = Editor(None, -1, 'DjangoApp - Editor', file, size=(600,400))
