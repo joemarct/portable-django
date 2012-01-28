@@ -1,0 +1,1 @@
+A standalone program that packages Django web framework for easy testing. This can also be used as a basis for packaging a Django project into standalone cross-platform program.
